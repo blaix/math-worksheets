@@ -1,0 +1,81 @@
+module Main exposing (main)
+
+import Gen.Components.Equation as Equation
+import Node exposing (Environment)
+import Prettynice
+import Prettynice.Request exposing (Request)
+import Prettynice.Response as Response exposing (Response)
+import Transmutable.Html as H exposing (Html)
+import Transmutable.Html.Attributes as A
+import Time
+import Task
+
+
+main : Prettynice.Program Model Msg
+main =
+    Prettynice.defineProgram
+        { init = init
+        , update = update
+        , subscriptions = (\_ -> Sub.none)
+        , onRequest = GotRequest
+        }
+
+
+type alias Model =
+    {}
+
+
+init : Environment -> Prettynice.Init Model Msg
+init env =
+    Prettynice.startProgram
+        { host = "127.0.0.1"
+        , port_ = 3000
+        , env = env
+        , model = {}
+        , command = Cmd.none
+        }
+
+
+type Msg
+    = GotRequest Request Response
+    | GotSeed Response Int
+
+
+update : Msg -> Model -> { model : Model, command : Cmd Msg }
+update msg model =
+    case msg of
+        GotRequest request response ->
+            { model = model
+            , command = 
+                Time.now
+                    |> Task.map Time.posixToMillis
+                    -- TODO: change http response to task so we can andThen it
+                    |> Task.perform (GotSeed response)
+            }
+
+        GotSeed response seed ->
+            { model = model
+            , command =
+                response
+                    |> Response.sendHtml
+                        { title = "Algebra Worksheet"
+                        , head = [ linkStylesheet ]
+                        , body = viewHomePage seed
+                        }
+            }
+
+
+viewHomePage : Int -> Array (Html msg)
+viewHomePage seed =
+    [ H.h1 [] [ H.text "Solve the Equations" ]
+    , H.p [] [ Equation.init { seed = seed } ]
+    , H.p [] [ Equation.init { seed = seed + 1 } ]
+    , H.p [] [ Equation.init { seed = seed + 2 } ]
+    , H.p [] [ Equation.init { seed = seed + 3 } ]
+    ]
+
+
+linkStylesheet : Html msg
+linkStylesheet =
+    -- Everything in public/ will be available at the root url path.
+    H.link [ A.rel "stylesheet", A.href "/styles.css" ]

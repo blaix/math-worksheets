@@ -1,0 +1,15 @@
+body {
+    margin: 40px;
+    font: 22px serif;
+    line-height: 28px;
+}
+
+h1 {
+    margin-bottom: 50px;
+    font: 32px sans-serif;
+    font-weight: bold;
+}
+
+p {
+    margin-bottom: 200px;
+}

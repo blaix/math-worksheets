@@ -1,0 +1,184 @@
+module Components.Equation exposing (component, Model, Msg, Props)
+
+import Prettynice.Component exposing (Component)
+import Transmutable.Html as H exposing (Html)
+import Transmutable.Html.Events as E
+import Random
+
+
+component : Component Props Model Msg
+component =
+    { init = init
+    , update = update
+    , subscriptions = subscriptions
+    , view = view
+    }
+
+
+-- MODEL
+
+
+type alias Model =
+    { value1 : Int
+    , value2 : Int
+    , varName : String
+    , whereVar : WhereVar
+    , answerSide : AnswerSide
+    , operation : Operation
+    }
+
+
+type alias Props =
+    { seed : Int
+    }
+
+
+type WhereVar
+    = First
+    | Second
+
+
+type AnswerSide
+    = Left
+    | Right
+
+
+type Operation
+    = Add
+    | Subtract
+    | Multiply
+
+
+init : Props -> { model : Model, command : Cmd Msg }
+init props =
+    let
+        seed0 =
+            Random.initialSeed props.seed
+
+        { value = value1, seed = seed1 } = 
+            Random.step (Random.int 2 9) seed0
+
+        { value = value2, seed = seed2 } = 
+            Random.step (Random.int 2 9) seed1
+
+        { value = whereVar, seed = seed3 } =
+            Random.step (Random.uniform First [ Second ]) seed2
+
+        { value = answerSide, seed = seed4 } =
+            Random.step (Random.uniform Left [ Right ]) seed3
+
+        { value = operation, seed = seed5 } =
+            Random.step (Random.uniform Add [ Subtract, Multiply ]) seed4
+
+        { value = varName } =
+            Random.step
+                ( Random.int 0 ((Array.length varNames) - 1)
+                    |> Random.map
+                        ( \i -> 
+                            Array.get i varNames
+                                |> Maybe.withDefault "x"
+                        )
+                )
+                seed2
+    in
+    { model =
+        { value1 = value1
+        , value2 = value2
+        , whereVar = whereVar
+        , answerSide = answerSide
+        , operation = operation
+        , varName = varName
+        }
+    , command =
+        Cmd.none
+    }
+
+
+varNames =
+    "abcdefghijkmnpqrstuvwxyz"
+        |> String.split ""
+
+
+-- UPDATE
+
+
+type Msg
+    = NoOp
+
+
+update : Msg -> Model -> { model : Model, command : Cmd Msg }
+update msg model =
+    case msg of
+        NoOp ->
+            { model = model
+            , command = Cmd.none
+            }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
+
+
+-- VIEW
+
+
+view : Model -> Html Msg
+view { value1, value2, whereVar, answerSide, operation, varName } =
+    let
+        values =
+            if value1 > value2 then
+                { left = value1
+                , right = value2
+                }
+
+            else
+                { left = value2
+                , right = value1
+                }
+
+        answer =
+            String.fromInt <|
+                case operation of
+                    Add -> 
+                        values.left + values.right       
+
+                    Subtract -> 
+                        values.left - values.right
+
+                    Multiply ->
+                        values.left * values.right
+
+        operationSymbol =
+            case operation of
+                Add -> 
+                    " + "
+
+                Subtract -> 
+                    " - "
+
+                Multiply -> 
+                    case whereVar of
+                        First ->
+                            " • "
+
+                        Second ->
+                            ""
+        
+        expression =
+            case whereVar of
+                First ->
+                    varName ++ operationSymbol ++ (String.fromInt values.right)
+            
+                Second ->
+                    (String.fromInt values.left) ++ operationSymbol ++ varName
+
+        equation =
+            case answerSide of
+                Left ->
+                    answer ++ " = " ++ expression
+
+                Right ->
+                    expression ++ " = " ++ answer
+    in
+    H.text equation
