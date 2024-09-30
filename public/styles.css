@@ -1,15 +1,25 @@
 body {
     margin: 40px;
-    font: 22px serif;
+    font: 20px serif;
     line-height: 28px;
 }
 
 h1 {
-    margin-bottom: 50px;
-    font: 32px sans-serif;
+    margin-bottom: 20px;
+    font: 30px sans-serif;
     font-weight: bold;
 }
 
 p {
-    margin-bottom: 200px;
+    margin: 30px 0 100px 0;
+}
+
+button {
+    margin-right: 8px;
+}
+
+@media print {    
+    .no-print {
+        display: none;
+    }
 }

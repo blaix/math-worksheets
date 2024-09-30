@@ -1,7 +1,8 @@
-module Components.Equation exposing (component, Model, Msg, Props)
+port module Components.Equations exposing (component, Model, Msg, Props)
 
 import Prettynice.Component exposing (Component)
 import Transmutable.Html as H exposing (Html)
+import Transmutable.Html.Attributes as A
 import Transmutable.Html.Events as E
 import Random
 
@@ -18,19 +19,14 @@ component =
 -- MODEL
 
 
-type alias Model =
-    { value1 : Int
-    , value2 : Int
-    , varName : String
-    , whereVar : WhereVar
-    , answerSide : AnswerSide
-    , operation : Operation
-    }
-
-
 type alias Props =
     { seed : Int
+    , count : Int
     }
+
+
+type alias Model =
+    Props
 
 
 type WhereVar
@@ -49,11 +45,96 @@ type Operation
     | Multiply
 
 
+{-| Possible values for variable names.
+-}
+varNames : Array String
+varNames =
+    "abcdefghijkmnpqrstuvwxyz"
+        |> String.split ""
+
+
 init : Props -> { model : Model, command : Cmd Msg }
 init props =
+    { model = props
+    , command = Cmd.none
+    }
+
+
+-- UPDATE
+
+
+type Msg
+    = Refresh
+    | More
+    | Less
+    | Print
+
+
+update : Msg -> Model -> { model : Model, command : Cmd Msg }
+update msg model =
+    case msg of
+        Refresh ->
+            { model = { model | seed = model.seed + model.count + 1 }
+            , command = Cmd.none
+            }
+
+        More ->
+            { model = { model | count = model.count + 1 }
+            , command = Cmd.none
+            }
+
+        Less ->
+            let
+                newCount =
+                    if model.count < 1 then
+                        0
+                    else
+                        model.count - 1
+            in
+            { model = { model | count = newCount }
+            , command = Cmd.none
+            }
+
+        Print ->
+            { model = model
+            , command = print {}
+            }
+
+
+port print : {} -> Cmd msg
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
+
+
+-- VIEW
+
+
+view : Model -> Html Msg
+view model =
+    H.div []
+        [ H.div [ A.class "no-print" ] 
+            [ H.button [ E.onClick Refresh ] [ H.text "Refresh" ]
+            , H.button [ E.onClick More ] [ H.text "More" ]
+            , H.button [ E.onClick Less ] [ H.text "Less" ]
+            , H.button [ E.onClick Print ] [ H.text "Print" ]
+            ]
+        , Array.range 0 model.count 
+            |> Array.map
+                (\i ->
+                    H.p [] [ viewRandomEquation (model.seed + i) ]
+                )
+            |> H.div []
+        ]
+
+
+viewRandomEquation : Int -> Html Msg
+viewRandomEquation seed =
     let
         seed0 =
-            Random.initialSeed props.seed
+            Random.initialSeed seed
 
         { value = value1, seed = seed1 } = 
             Random.step (Random.int 2 9) seed0
@@ -80,52 +161,7 @@ init props =
                         )
                 )
                 seed2
-    in
-    { model =
-        { value1 = value1
-        , value2 = value2
-        , whereVar = whereVar
-        , answerSide = answerSide
-        , operation = operation
-        , varName = varName
-        }
-    , command =
-        Cmd.none
-    }
 
-
-varNames =
-    "abcdefghijkmnpqrstuvwxyz"
-        |> String.split ""
-
-
--- UPDATE
-
-
-type Msg
-    = NoOp
-
-
-update : Msg -> Model -> { model : Model, command : Cmd Msg }
-update msg model =
-    case msg of
-        NoOp ->
-            { model = model
-            , command = Cmd.none
-            }
-
-
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
-
-
--- VIEW
-
-
-view : Model -> Html Msg
-view { value1, value2, whereVar, answerSide, operation, varName } =
-    let
         values =
             if value1 > value2 then
                 { left = value1
@@ -182,3 +218,5 @@ view { value1, value2, whereVar, answerSide, operation, varName } =
                     expression ++ " = " ++ answer
     in
     H.text equation
+
+
