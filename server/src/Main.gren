@@ -68,6 +68,10 @@ update msg model =
 viewHomePage : Int -> Array (Html msg)
 viewHomePage seed =
     [ H.h1 [] [ H.text "Solve the Equations" ]
+
+    -- TODO: Make number of equations controlled in the component.
+    -- This should be possible now thanks to the move to Random.step
+
     , H.p [] [ Equation.init { seed = seed } ]
     , H.p [] [ Equation.init { seed = seed + 1 } ]
     , H.p [] [ Equation.init { seed = seed + 2 } ]
