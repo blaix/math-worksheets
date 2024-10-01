@@ -15,7 +15,7 @@ The dev server will restart when files change
 
 ## Now what?
 
-Take a look at [`server/src/Main.gren`](server/src/Main.gren) for the server-side logic, and [`client/src/Components/Equations.gren`](client/src/Components/Equations.gren) for the client-side logic.
+Take a look at [`server/src/Main.gren`](server/src/Main.gren) for the server-side logic, [`client/src/Components/Equations.gren`](client/src/Components/Equations.gren) for the client-side logic, and [`client/src/Components/Equations.js`](client/src/Components/Equations.js) for the little bit of js needed for the print button.
 
 If you aren't familiar with prettynice, take a look at [the README](https://github.com/blaix/prettynice?tab=readme-ov-file#pretty-nice-framework) or the [doc site](https://prettynice.dev/).
 
