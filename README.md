@@ -2,7 +2,7 @@
 
 Web app for generating algebra worksheets using the [prettynice framework](https://github.com/blaix/prettynice).
 
-You can see it running at https://math-worksheets.fly.dev/
+You can see it running at https://math-worksheets.fly.dev
 
 ## Usage
 
