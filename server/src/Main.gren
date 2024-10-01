@@ -28,7 +28,7 @@ type alias Model =
 init : Environment -> Prettynice.Init Model Msg
 init env =
     Prettynice.startProgram
-        { host = "127.0.0.1"
+        { host = "0.0.0.0"
         , port_ = 3000
         , env = env
         , model = {}

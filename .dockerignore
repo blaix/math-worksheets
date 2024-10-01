@@ -1,0 +1,6 @@
+.direnv
+.envrc
+.gren
+.prettynice
+dist
+node_modules

@@ -2,6 +2,8 @@
 
 Web app for generating algebra worksheets using the [prettynice framework](https://github.com/blaix/prettynice).
 
+You can see it running at https://math-worksheets.fly.dev/
+
 ## Usage
 
 Initial setup: `npm install`
@@ -19,8 +21,12 @@ If you aren't familiar with prettynice, take a look at [the README](https://gith
 
 ## Deployment
 
-Create an optimized production build with `npm run build`,
-and start the server with `npm start`.
+This repo is deployed Fly at https://math-worksheets.fly.dev/
+
+You can [deploy your own fork to fly](https://fly.io/docs/reference/fly-launch/) or deploy anywhere that supports docker containers or node servers.
+
+You can create an optimized production build in `dist/` with `npm run build`, and start the server with `npm start`.
+See [`package.json`](package.json) for details.
 
 ## Distribution and Copyright
 
