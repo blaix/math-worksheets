@@ -26,7 +26,19 @@ type alias Props =
 
 
 type alias Model =
-    Props
+    { seed : Int
+    , count : Int
+    , answerSide : SideOption
+    , variableSide : SideOption
+    , operationsHead : Operation
+    , operationsTail : Array Operation
+    }
+
+
+type SideOption
+    = OnlyLeft
+    | OnlyRight
+    | Both
 
 
 type WhereVar
@@ -55,7 +67,15 @@ varNames =
 
 init : Props -> { model : Model, command : Cmd Msg }
 init props =
-    { model = props
+    { model = 
+        { seed = props.seed
+        , count = props.count
+        -- TODO: add options to the UI for these
+        , answerSide = OnlyRight
+        , variableSide = OnlyLeft
+        , operationsHead = Add
+        , operationsTail = []
+        }
     , command = Cmd.none
     }
 
@@ -122,16 +142,38 @@ view model =
             , H.button [ E.onClick Print ] [ H.text "Print" ]
             ]
         , Array.range 0 model.count 
-            |> Array.map (\i -> viewRandomEquation (model.seed + i))
+            |> Array.map (\i -> viewRandomEquation ({model | seed = model.seed + i}))
             |> H.div []
         ]
 
 
-viewRandomEquation : Int -> Html Msg
-viewRandomEquation seed =
+viewRandomEquation : Model -> Html Msg
+viewRandomEquation model =
     let
+        whereVarPool =
+            case model.variableSide of
+                OnlyLeft ->
+                    { head = First, tail = [] }
+
+                OnlyRight ->
+                    { head = Second, tail = [] }
+
+                Both ->
+                    { head = First, tail = [ Second ] }
+
+        answerSidePool =
+            case model.answerSide of
+                OnlyLeft ->
+                    { head = Left, tail = [] }
+
+                OnlyRight ->
+                    { head = Right, tail = [] }
+
+                Both ->
+                    { head = Left, tail = [ Right ] }
+
         seed0 =
-            Random.initialSeed seed
+            Random.initialSeed model.seed
 
         { value = value1, seed = seed1 } = 
             Random.step (Random.int 2 9) seed0
@@ -140,13 +182,13 @@ viewRandomEquation seed =
             Random.step (Random.int 2 9) seed1
 
         { value = whereVar, seed = seed3 } =
-            Random.step (Random.uniform First [ Second ]) seed2
+            Random.step (Random.uniform whereVarPool.head whereVarPool.tail) seed2
 
         { value = answerSide, seed = seed4 } =
-            Random.step (Random.uniform Left [ Right ]) seed3
+            Random.step (Random.uniform answerSidePool.head answerSidePool.tail) seed3
 
         { value = operation, seed = seed5 } =
-            Random.step (Random.uniform Add [ Subtract, Multiply ]) seed4
+            Random.step (Random.uniform model.operationsHead model.operationsTail) seed4
 
         { value = varName } =
             Random.step
@@ -197,7 +239,7 @@ viewRandomEquation seed =
 
                         Second ->
                             ""
-        
+         
         expression =
             case whereVar of
                 First ->
