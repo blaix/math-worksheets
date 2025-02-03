@@ -89,6 +89,7 @@ type Msg
     | Less
     | Print
     | ChangedVariableSide String
+    | ChangedAnswerSide String
 
 
 update : Msg -> Model -> { model : Model, command : Cmd Msg }
@@ -123,16 +124,30 @@ update msg model =
 
         ChangedVariableSide selected ->
             { model = 
-                { model
-                    | variableSide =
-                        case selected of
-                            "Left" -> OnlyLeft
-                            "Right" -> OnlyRight
-                            "Both" -> Both
-                            _ -> OnlyLeft
+                { model 
+                    | variableSide = 
+                        stringToSideOption selected
                 }
             , command = Cmd.none
             }
+
+        ChangedAnswerSide selected ->
+            { model = 
+                { model 
+                    | answerSide = 
+                        stringToSideOption selected
+                }
+            , command = Cmd.none
+            }
+
+
+stringToSideOption : String -> SideOption
+stringToSideOption string =
+    case string of
+        "Left" -> OnlyLeft
+        "Right" -> OnlyRight
+        "Both" -> Both
+        _ -> OnlyLeft
 
 
 port print : {} -> Cmd msg
@@ -163,6 +178,17 @@ view model =
                     [ H.option [ A.selected (model.variableSide == OnlyLeft) ] [ H.text "Left" ]
                     , H.option [ A.selected (model.variableSide == OnlyRight) ] [ H.text "Right" ]
                     , H.option [ A.selected (model.variableSide == Both) ] [ H.text "Both" ]
+                    ]
+                ] 
+            ]
+        , H.div [ A.class "no-print" ] 
+            [ H.label []
+                [ H.text "Answer side: " 
+                , H.select
+                    [ E.onInput ChangedAnswerSide ]
+                    [ H.option [ A.selected (model.answerSide == OnlyLeft) ] [ H.text "Left" ]
+                    , H.option [ A.selected (model.answerSide == OnlyRight) ] [ H.text "Right" ]
+                    , H.option [ A.selected (model.answerSide == Both) ] [ H.text "Both" ]
                     ]
                 ] 
             ]
