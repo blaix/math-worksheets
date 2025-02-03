@@ -1,0 +1,2 @@
+- [ ] Move off prettynice onto latest gren. Get initial seed from js flag.
+- [ ] Publish [one-or-more](https://github.com/blaix/one-or-more) and use it for `Model.operations[Head|Tail]`
