@@ -1,2 +1,1 @@
-- [ ] Move off prettynice onto latest gren. Get initial seed from js flag.
-- [ ] Publish [one-or-more](https://github.com/blaix/one-or-more) and use it for `Model.operations[Head|Tail]`
+- [ ] Cancel plans for [one-or-more](https://github.com/blaix/one-or-more) as a package, move it into this repo, update for gren 0.4, and use it to hold `Model.operations` instead of `Model.operations[Head|Tail]`
