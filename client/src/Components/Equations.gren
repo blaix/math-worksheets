@@ -1,7 +1,7 @@
 port module Components.Equations exposing (component, Model, Msg, Props)
 
 import Prettynice.Component exposing (Component)
-import Transmutable.Html as H exposing (Html)
+import Transmutable.Html as H exposing (Html, Attribute)
 import Transmutable.Html.Attributes as A
 import Transmutable.Html.Events as E
 import Random
@@ -88,6 +88,7 @@ type Msg
     | More
     | Less
     | Print
+    | ChangedVariableSide String
 
 
 update : Msg -> Model -> { model : Model, command : Cmd Msg }
@@ -120,6 +121,19 @@ update msg model =
             , command = print {}
             }
 
+        ChangedVariableSide selected ->
+            { model = 
+                { model
+                    | variableSide =
+                        case selected of
+                            "Left" -> OnlyLeft
+                            "Right" -> OnlyRight
+                            "Both" -> Both
+                            _ -> OnlyLeft
+                }
+            , command = Cmd.none
+            }
+
 
 port print : {} -> Cmd msg
 
@@ -140,6 +154,17 @@ view model =
             , H.button [ E.onClick More ] [ H.text "More" ]
             , H.button [ E.onClick Less ] [ H.text "Less" ]
             , H.button [ E.onClick Print ] [ H.text "Print" ]
+            ]
+        , H.div [ A.class "no-print" ] 
+            [ H.label []
+                [ H.text "Variable side: " 
+                , H.select
+                    [ E.onInput ChangedVariableSide ]
+                    [ H.option [ A.selected (model.variableSide == OnlyLeft) ] [ H.text "Left" ]
+                    , H.option [ A.selected (model.variableSide == OnlyRight) ] [ H.text "Right" ]
+                    , H.option [ A.selected (model.variableSide == Both) ] [ H.text "Both" ]
+                    ]
+                ] 
             ]
         , Array.range 0 model.count 
             |> Array.map (\i -> viewRandomEquation ({model | seed = model.seed + i}))
