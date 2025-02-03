@@ -5,6 +5,7 @@ import Transmutable.Html as H exposing (Html, Attribute)
 import Transmutable.Html.Attributes as A
 import Transmutable.Html.Events as E
 import Random
+import Set
 
 
 component : Component Props Model Msg
@@ -90,6 +91,9 @@ type Msg
     | Print
     | ChangedVariableSide String
     | ChangedAnswerSide String
+    | AddChecked Bool
+    | SubtractChecked Bool
+    | MultiplyChecked Bool
 
 
 update : Msg -> Model -> { model : Model, command : Cmd Msg }
@@ -139,6 +143,72 @@ update msg model =
                 }
             , command = Cmd.none
             }
+
+        AddChecked checked ->
+            { model =
+                if checked then
+                    addOperation Add model
+                else
+                    removeOperation Add model
+            , command = 
+                Cmd.none
+            }
+
+        SubtractChecked checked ->
+            { model =
+                if checked then
+                    addOperation Subtract model
+                else
+                    removeOperation Subtract model
+            , command = 
+                Cmd.none
+            }
+
+        MultiplyChecked checked ->
+            { model =
+                if checked then
+                    addOperation Multiply model
+                else
+                    removeOperation Multiply model
+            , command = 
+                Cmd.none
+            }
+
+
+addOperation : Operation -> Model -> Model
+addOperation operation model =
+    let
+        operations =
+            ([ model.operationsHead ] ++ model.operationsTail)
+                |> Array.filter (\op -> op /= operation)
+                |> Array.pushLast operation
+    in
+    setOperations operations model
+
+
+removeOperation : Operation -> Model -> Model
+removeOperation operation model =
+    let
+        operations =
+            ([ model.operationsHead ] ++ model.operationsTail)
+                |> Array.filter (\op -> op /= operation)
+    in
+    setOperations operations model
+
+
+setOperations : Array Operation -> Model -> Model
+setOperations operations model =
+    { model
+        | operationsHead =
+            case Array.takeFirst 1 operations of
+                [ head ] ->
+                    head
+
+                _ ->
+                    Add
+        , operationsTail =
+            Array.dropFirst 1 operations
+    }
 
 
 stringToSideOption : String -> SideOption
@@ -192,10 +262,48 @@ view model =
                     ]
                 ] 
             ]
+        , H.div [ A.class "no-print" ] 
+            [ H.div []
+                [ H.text "Operations: " 
+                , H.label []
+                    [ H.input
+                        [ A.type_ "checkbox"
+                        , A.checked (hasOperation Add model)
+                        , E.onCheck AddChecked
+                        ]
+                        []
+                    , H.text "Add "
+                    ]
+                , H.label []
+                    [ H.input
+                        [ A.type_ "checkbox"
+                        , A.checked (hasOperation Subtract model)
+                        , E.onCheck SubtractChecked
+                        ]
+                        []
+                    , H.text "Subtract "
+                    ]
+                , H.label []
+                    [ H.input
+                        [ A.type_ "checkbox"
+                        , A.checked (hasOperation Multiply model)
+                        , E.onCheck MultiplyChecked
+                        ]
+                        []
+                    , H.text "Multiply "
+                    ]
+                ] 
+            ]
         , Array.range 0 model.count 
             |> Array.map (\i -> viewRandomEquation ({model | seed = model.seed + i}))
             |> H.div []
         ]
+
+
+hasOperation : Operation -> Model -> Bool
+hasOperation operation model =
+    ([ model.operationsHead ] ++ model.operationsTail)
+        |> Array.member operation
 
 
 viewRandomEquation : Model -> Html Msg
