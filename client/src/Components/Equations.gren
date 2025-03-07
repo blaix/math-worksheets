@@ -98,7 +98,7 @@ type Msg
 
 update : Msg -> Model -> { model : Model, command : Cmd Msg }
 update msg model =
-    case msg of
+    when msg is
         Refresh ->
             { model = { model | seed = model.seed + model.count + 1 }
             , command = Cmd.none
@@ -180,7 +180,7 @@ addOperation operation model =
     let
         operations =
             ([ model.operationsHead ] ++ model.operationsTail)
-                |> Array.filter (\op -> op /= operation)
+                |> Array.keepIf (\op -> op /= operation)
                 |> Array.pushLast operation
     in
     setOperations operations model
@@ -191,7 +191,7 @@ removeOperation operation model =
     let
         operations =
             ([ model.operationsHead ] ++ model.operationsTail)
-                |> Array.filter (\op -> op /= operation)
+                |> Array.keepIf (\op -> op /= operation)
     in
     setOperations operations model
 
@@ -200,7 +200,7 @@ setOperations : Array Operation -> Model -> Model
 setOperations operations model =
     { model
         | operationsHead =
-            case Array.takeFirst 1 operations of
+            when Array.takeFirst 1 operations is
                 [ head ] ->
                     head
 
@@ -213,7 +213,7 @@ setOperations operations model =
 
 stringToSideOption : String -> SideOption
 stringToSideOption string =
-    case string of
+    when string is
         "Left" -> OnlyLeft
         "Right" -> OnlyRight
         "Both" -> Both
@@ -310,7 +310,7 @@ viewRandomEquation : Model -> Html Msg
 viewRandomEquation model =
     let
         whereVarPool =
-            case model.variableSide of
+            when model.variableSide is
                 OnlyLeft ->
                     { head = First, tail = [] }
 
@@ -321,7 +321,7 @@ viewRandomEquation model =
                     { head = First, tail = [ Second ] }
 
         answerSidePool =
-            case model.answerSide of
+            when model.answerSide is
                 OnlyLeft ->
                     { head = Left, tail = [] }
 
@@ -373,7 +373,7 @@ viewRandomEquation model =
 
         answer =
             String.fromInt <|
-                case operation of
+                when operation is
                     Add -> 
                         values.left + values.right       
 
@@ -384,7 +384,7 @@ viewRandomEquation model =
                         values.left * values.right
 
         operationSymbol =
-            case operation of
+            when operation is
                 Add -> 
                     " + "
 
@@ -392,7 +392,7 @@ viewRandomEquation model =
                     " - "
 
                 Multiply -> 
-                    case whereVar of
+                    when whereVar is
                         First ->
                             " • "
 
@@ -400,7 +400,7 @@ viewRandomEquation model =
                             ""
          
         expression =
-            case whereVar of
+            when whereVar is
                 First ->
                     varName ++ operationSymbol ++ (String.fromInt values.right)
             
@@ -408,7 +408,7 @@ viewRandomEquation model =
                     (String.fromInt values.left) ++ operationSymbol ++ varName
 
         equation =
-            case answerSide of
+            when answerSide is
                 Left ->
                     answer ++ " = " ++ expression
 

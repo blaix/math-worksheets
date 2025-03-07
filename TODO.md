@@ -1,2 +1,2 @@
-- [ ] Get onto Gren 0.5 (requires prettynice upgrade)
+- [X] Get onto Gren 0.5 (requires prettynice upgrade)
 - [ ] Publish [one-or-more](https://github.com/blaix/one-or-more) and use it to hold `Model.operations` instead of `Model.operations[Head|Tail]`
