@@ -29,6 +29,8 @@ type alias Props =
 type alias Model =
     { seed : Int
     , count : Int
+    , minConstant : Int
+    , maxConstant : Int
     , answerSide : SideOption
     , variableSide : SideOption
     , operationsHead : Operation
@@ -58,6 +60,16 @@ type Operation
     | Multiply
 
 
+defaultMinConstant : Int
+defaultMinConstant =
+    2
+
+
+defaultMaxConstant : Int
+defaultMaxConstant =
+    9
+
+
 {-| Possible values for variable names.
 -}
 varNames : Array String
@@ -71,7 +83,8 @@ init props =
     { model = 
         { seed = props.seed
         , count = props.count
-        -- TODO: add options to the UI for these
+        , minConstant = defaultMinConstant
+        , maxConstant = defaultMaxConstant
         , answerSide = OnlyRight
         , variableSide = OnlyLeft
         , operationsHead = Add
@@ -91,6 +104,8 @@ type Msg
     | Print
     | ChangedVariableSide String
     | ChangedAnswerSide String
+    | ChangedMinConstant String
+    | ChangedMaxConstant String
     | AddChecked Bool
     | SubtractChecked Bool
     | MultiplyChecked Bool
@@ -171,6 +186,30 @@ update msg model =
                 else
                     removeOperation Multiply model
             , command = 
+                Cmd.none
+            }
+
+        ChangedMinConstant n ->
+            { model =
+                { model
+                    | minConstant =
+                        n
+                            |> String.toInt
+                            |> Maybe.withDefault defaultMinConstant
+                }
+            , command =
+                Cmd.none
+            }
+
+        ChangedMaxConstant n ->
+            { model =
+                { model
+                    | maxConstant =
+                        n
+                            |> String.toInt
+                            |> Maybe.withDefault defaultMaxConstant
+                }
+            , command =
                 Cmd.none
             }
 
@@ -294,6 +333,29 @@ view model =
                     ]
                 ] 
             ]
+        , H.div [ A.class "no-print" ]
+            [ H.label []
+                [ H.text "Min constant: "
+                , H.input
+                    [ A.type_ "number"
+                    , A.style "width" "100px"
+                    , A.value (String.fromInt model.minConstant)
+                    , E.onInput ChangedMinConstant
+                    ]
+                    []
+                ]
+            , H.text " "
+            , H.label []
+                [ H.text "Max constant: "
+                , H.input
+                    [ A.type_ "number"
+                    , A.style "width" "100px"
+                    , A.value (String.fromInt model.maxConstant)
+                    , E.onInput ChangedMaxConstant
+                    ]
+                    []
+                ]
+            ]
         , Array.range 0 model.count 
             |> Array.map (\i -> viewRandomEquation ({model | seed = model.seed + i}))
             |> H.div []
@@ -335,10 +397,10 @@ viewRandomEquation model =
             Random.initialSeed model.seed
 
         { value = value1, seed = seed1 } = 
-            Random.step (Random.int 2 9) seed0
+            Random.step (Random.int model.minConstant model.maxConstant) seed0
 
         { value = value2, seed = seed2 } = 
-            Random.step (Random.int 2 9) seed1
+            Random.step (Random.int model.minConstant model.maxConstant ) seed1
 
         { value = whereVar, seed = seed3 } =
             Random.step (Random.uniform whereVarPool.head whereVarPool.tail) seed2
