@@ -25,7 +25,9 @@ This repo is deployed Fly at https://math-worksheets.fly.dev/
 
 You can [deploy your own fork to fly](https://fly.io/docs/reference/fly-launch/) or deploy anywhere that supports docker containers or node servers.
 
-You can create an optimized production build in `dist/` with `npm run build`, and start the server with `npm start`.
+Deploy with `flyctl deploy`
+
+You can create an optimized production build in `dist/` with `npm run build:prod`, and start the server with `npm start`.
 See [`package.json`](package.json) for details.
 
 ## Distribution and Copyright

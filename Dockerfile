@@ -27,7 +27,7 @@ RUN npm ci --include=dev
 COPY . .
 
 # Build application
-RUN npm run build
+RUN npm run build:prod
 
 # Remove development dependencies
 RUN npm prune --omit=dev
